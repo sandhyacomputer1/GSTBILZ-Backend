@@ -42,7 +42,9 @@ public class SecurityConfig {
 				.cors(Customizer.withDefaults())
 				.csrf(AbstractHttpConfigurer::disable)
 				.authorizeHttpRequests(auth -> auth
-						.requestMatchers("/", "/login", "/encode", "/error", "/verify-email", "/register-shop", "/login/google", "/forgot-password", "/reset-password").permitAll()
+						.requestMatchers("/", "/login", "/encode", "/error", "/verify-email", "/register-shop",
+								"/login/google", "/forgot-password", "/reset-password")
+						.permitAll()
 						.requestMatchers("/admin/shop-owners", "/admin/shop-owners/**").hasRole("SUPERADMIN")
 						.requestMatchers(HttpMethod.DELETE, "/orders/**").hasAnyRole("SHOPOWNER", "SUPERADMIN")
 						.requestMatchers("/categories", "/categories/**", "/items", "/items/**", "/admin/items",
@@ -74,7 +76,8 @@ public class SecurityConfig {
 	public CorsConfigurationSource corsConfigurationSource() {
 
 		CorsConfiguration config = new CorsConfiguration();
-		config.setAllowedOrigins(List.of("http://localhost:5173", "https://gstbliz-fortend-production.up.railway.app", "https://billingsoftwergst.up.railway.app"));
+		config.setAllowedOrigins(List.of("http://localhost:5173", "https://billingsoftwergst.up.railway.app",
+				"https://billingsoftwergst.up.railway.app"));
 		config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
 		config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
 		config.setAllowCredentials(true);
