@@ -24,20 +24,10 @@ import com.entity.ItemEntity;
 import com.repository.ItemRepository;
 import com.service.ItemImportService;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
-import java.util.Collections;
-import com.repository.UserRepository;
-import com.entity.UserEntity;
-
-import org.junit.jupiter.api.Disabled;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Transactional
-@Disabled("Disabled integration tests to prevent build failures due to external database connectivity requirements on Railway build environment.")
 class BillingsoftwareApplicationTests {
 
 	@Autowired
@@ -45,30 +35,6 @@ class BillingsoftwareApplicationTests {
 
 	@Autowired
 	private ItemRepository itemRepository;
-
-	@Autowired
-	private UserRepository userRepository;
-
-	@BeforeEach
-	void setUp() {
-		// Create mock user in database for the tests
-		if (userRepository.findByEmail("test@example.com").isEmpty()) {
-			UserEntity testUser = UserEntity.builder()
-					.userId("test-user-id")
-					.email("test@example.com")
-					.role("ROLE_SHOPOWNER")
-					.isVerified(true)
-					.accountStatus("APPROVED")
-					.shopId("test-shop-id")
-					.build();
-			userRepository.save(testUser);
-		}
-
-		// Set up Security Context
-		User principal = new User("test@example.com", "", Collections.emptyList());
-		UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(principal, null, Collections.emptyList());
-		SecurityContextHolder.getContext().setAuthentication(auth);
-	}
 
 	@Test
 	void contextLoads() {
@@ -108,8 +74,7 @@ class BillingsoftwareApplicationTests {
 		MockMultipartFile multipartFile = new MockMultipartFile(
 				"file", "products.xlsx",
 				"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-				excelBytes
-		);
+				excelBytes);
 
 		// 2. Perform import
 		ImportSummaryResponse response = itemImportService.importExcel(multipartFile);
@@ -121,8 +86,10 @@ class BillingsoftwareApplicationTests {
 
 		// Verify database records
 		List<ItemEntity> items = itemRepository.findAll();
-		boolean laptopFound = items.stream().anyMatch(i -> i.getName().equals("Test Excel Laptop") && i.getPrice().compareTo(new BigDecimal("55000.0")) == 0);
-		boolean mouseFound = items.stream().anyMatch(i -> i.getName().equals("Test Excel Mouse") && i.getPrice().compareTo(new BigDecimal("450.0")) == 0);
+		boolean laptopFound = items.stream().anyMatch(
+				i -> i.getName().equals("Test Excel Laptop") && i.getPrice().compareTo(new BigDecimal("55000.0")) == 0);
+		boolean mouseFound = items.stream().anyMatch(
+				i -> i.getName().equals("Test Excel Mouse") && i.getPrice().compareTo(new BigDecimal("450.0")) == 0);
 		assertTrue(laptopFound);
 		assertTrue(mouseFound);
 	}
@@ -153,8 +120,7 @@ class BillingsoftwareApplicationTests {
 		MockMultipartFile multipartFile = new MockMultipartFile(
 				"file", "products.pdf",
 				"application/pdf",
-				pdfBytes
-		);
+				pdfBytes);
 
 		// 2. Perform import
 		ImportSummaryResponse response = itemImportService.importPdf(multipartFile);
@@ -166,10 +132,11 @@ class BillingsoftwareApplicationTests {
 
 		// Verify database records
 		List<ItemEntity> items = itemRepository.findAll();
-		boolean keyboardFound = items.stream().anyMatch(i -> i.getName().equals("Test PDF Keyboard") && i.getPrice().compareTo(new BigDecimal("1200.0")) == 0);
-		boolean monitorFound = items.stream().anyMatch(i -> i.getName().equals("Test PDF Monitor") && i.getPrice().compareTo(new BigDecimal("15000.0")) == 0);
+		boolean keyboardFound = items.stream().anyMatch(
+				i -> i.getName().equals("Test PDF Keyboard") && i.getPrice().compareTo(new BigDecimal("1200.0")) == 0);
+		boolean monitorFound = items.stream().anyMatch(
+				i -> i.getName().equals("Test PDF Monitor") && i.getPrice().compareTo(new BigDecimal("15000.0")) == 0);
 		assertTrue(keyboardFound);
 		assertTrue(monitorFound);
 	}
 }
-

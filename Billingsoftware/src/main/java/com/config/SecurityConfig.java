@@ -42,7 +42,7 @@ public class SecurityConfig {
 				.cors(Customizer.withDefaults())
 				.csrf(AbstractHttpConfigurer::disable)
 				.authorizeHttpRequests(auth -> auth
-						.requestMatchers("/login", "/encode", "/error", "/verify-email", "/register-shop", "/login/google", "/forgot-password", "/reset-password").permitAll()
+						.requestMatchers("/", "/login", "/encode", "/error", "/verify-email", "/register-shop", "/login/google", "/forgot-password", "/reset-password").permitAll()
 						.requestMatchers("/admin/shop-owners", "/admin/shop-owners/**").hasRole("SUPERADMIN")
 						.requestMatchers(HttpMethod.DELETE, "/orders/**").hasAnyRole("SHOPOWNER", "SUPERADMIN")
 						.requestMatchers("/categories", "/categories/**", "/items", "/items/**", "/admin/items",
