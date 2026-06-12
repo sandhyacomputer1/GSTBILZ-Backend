@@ -76,7 +76,7 @@ public class SecurityConfig {
 	public CorsConfigurationSource corsConfigurationSource() {
 
 		CorsConfiguration config = new CorsConfiguration();
-		config.setAllowedOrigins(List.of("http://localhost:5173", "https://billingsoftwergst.up.railway.app",
+		config.setAllowedOrigins(List.of("http://localhost:5173", "https://billingsoftwaregst.up.railway.app",
 				"https://billingsoftwergst.up.railway.app"));
 		config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
 		config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
