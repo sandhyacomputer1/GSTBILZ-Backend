@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -33,7 +34,7 @@ public class CategoryController {
     @ResponseStatus(HttpStatus.CREATED)
     public CategoryResponse addCategory(
             @RequestPart("category") String categoryString,
-            @RequestPart("file") MultipartFile file) {
+            @RequestParam("file") MultipartFile file) {
 
         ObjectMapper objectMapper = new ObjectMapper();
 
@@ -75,7 +76,7 @@ public class CategoryController {
     public CategoryResponse editCategory(
             @PathVariable String categoryId,
             @RequestPart("category") String categoryString,
-            @RequestPart(value = "file", required = false) MultipartFile file) {
+            @RequestParam(value = "file", required = false) MultipartFile file) {
 
         ObjectMapper objectMapper = new ObjectMapper();
 

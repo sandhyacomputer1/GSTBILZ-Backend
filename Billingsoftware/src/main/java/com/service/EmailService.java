@@ -11,7 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class EmailService {
 
-    @Autowired
+    @Autowired(required = false)
     private JavaMailSender mailSender;
 
     public void sendVerificationEmail(String toEmail, String token) {
@@ -79,6 +79,79 @@ public class EmailService {
         }
     }
 
+    public void sendTrialStartEmail(String toEmail, String ownerName, String expiryDate) {
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setTo(toEmail);
+            message.setSubject("Your 7-Day Free Trial Has Started - Billing Software");
+            message.setText("Hello " + ownerName + ",\n\n"
+                    + "Your 7-day free trial has started! You now have full access to all features of the Billing Software.\n\n"
+                    + "Trial expires on: " + expiryDate + "\n\n"
+                    + "To continue using the software after your trial, please contact the Super Admin to assign a subscription plan.\n\n"
+                    + "Login here: http://localhost:5173/login\n\n"
+                    + "Best regards,\nBilling Software Team");
+            mailSender.send(message);
+            log.info("Trial start email sent to {}", toEmail);
+        } catch (Exception e) {
+            log.error("Failed to send trial start email to {}: {}", toEmail, e.getMessage());
+        }
+    }
+
+    public void sendExpiryWarningEmail(String toEmail, String ownerName, int daysLeft, String planName, String expiryDate) {
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setTo(toEmail);
+            String dayWord = daysLeft == 1 ? "tomorrow" : "in " + daysLeft + " days";
+            message.setSubject("Action Required: Your " + planName + " expires " + dayWord + " - Billing Software");
+            message.setText("Hello " + ownerName + ",\n\n"
+                    + "This is a reminder that your " + planName + " will expire " + dayWord + " (on " + expiryDate + ").\n\n"
+                    + "After expiry, billing operations will be disabled until a new subscription is assigned.\n\n"
+                    + "Please contact the Super Admin to renew your subscription.\n\n"
+                    + "Login here: http://localhost:5173/login\n\n"
+                    + "Best regards,\nBilling Software Team");
+            mailSender.send(message);
+            log.info("Expiry warning email ({} days) sent to {}", daysLeft, toEmail);
+        } catch (Exception e) {
+            log.error("Failed to send expiry warning email to {}: {}", toEmail, e.getMessage());
+        }
+    }
+
+    public void sendExpiredEmail(String toEmail, String ownerName, String planName) {
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setTo(toEmail);
+            message.setSubject("Your " + planName + " Has Expired - Billing Software");
+            message.setText("Hello " + ownerName + ",\n\n"
+                    + "Your " + planName + " has expired. Billing operations are currently disabled.\n\n"
+                    + "Please contact the Super Admin to renew your subscription and regain full access.\n\n"
+                    + "Login here: http://localhost:5173/login\n\n"
+                    + "Best regards,\nBilling Software Team");
+            mailSender.send(message);
+            log.info("Expired email sent to {}", toEmail);
+        } catch (Exception e) {
+            log.error("Failed to send expired email to {}: {}", toEmail, e.getMessage());
+        }
+    }
+
+    public void sendSuperAdminExpiryAlert(String adminEmail, String shopName, String planName, int daysLeft) {
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setTo(adminEmail);
+            String subject = daysLeft == 0
+                    ? "[Alert] " + shopName + " subscription expired"
+                    : "[Alert] " + shopName + " subscription expires in " + daysLeft + " day(s)";
+            message.setSubject(subject);
+            String body = daysLeft == 0
+                    ? "Shop '" + shopName + "' - " + planName + " has expired. Please assign a new subscription."
+                    : "Shop '" + shopName + "' - " + planName + " will expire in " + daysLeft + " day(s). Consider renewing.";
+            message.setText(body + "\n\nManage subscriptions: http://localhost:5173/subscription-management");
+            mailSender.send(message);
+            log.info("Super admin expiry alert sent for shop '{}' ({} days)", shopName, daysLeft);
+        } catch (Exception e) {
+            log.error("Failed to send super admin expiry alert: {}", e.getMessage());
+        }
+    }
+
     public void sendOtpEmail(String toEmail, String otp) {
         try {
             SimpleMailMessage message = new SimpleMailMessage();
@@ -91,6 +164,43 @@ public class EmailService {
             log.info("OTP email sent successfully to {}", toEmail);
         } catch (Exception e) {
             log.error("Failed to send OTP email to {}: {}", toEmail, e.getMessage());
+        }
+    }
+
+    public void sendSubscriptionRenewalRequestEmail(String adminEmail, String shopName, String ownerName, String ownerEmail, String ownerMobile, String status, String expiryDate) {
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setTo(adminEmail);
+            message.setSubject("Subscription Renewal Request");
+            message.setText("Hello Super Admin,\n\n"
+                    + "The following shop owner has requested subscription renewal.\n\n"
+                    + "Shop Name: " + shopName + "\n"
+                    + "Owner Name: " + ownerName + "\n"
+                    + "Email: " + ownerEmail + "\n"
+                    + "Mobile: " + ownerMobile + "\n"
+                    + "Subscription Status: " + status + "\n"
+                    + "Expiry Date: " + expiryDate + "\n\n"
+                    + "Please contact the shop owner for subscription activation.\n\n"
+                    + "Thank You.");
+            mailSender.send(message);
+            log.info("Subscription renewal request email sent successfully to Super Admin {}", adminEmail);
+        } catch (Exception e) {
+            log.error("Failed to send subscription renewal request email: {}", e.getMessage());
+        }
+    }
+
+    public void sendSubscriptionActivatedEmail(String toEmail, String ownerName) {
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setTo(toEmail);
+            message.setSubject("Subscription Activated - Billing Software");
+            message.setText("Hello " + ownerName + ",\n\n"
+                    + "Your subscription has been activated successfully. You can now continue using all billing features.\n\n"
+                    + "Best regards,\nBilling Software Team");
+            mailSender.send(message);
+            log.info("Subscription activation email sent successfully to {}", toEmail);
+        } catch (Exception e) {
+            log.error("Failed to send subscription activation email to {}: {}", toEmail, e.getMessage());
         }
     }
 }

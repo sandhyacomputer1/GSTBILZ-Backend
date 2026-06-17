@@ -11,14 +11,16 @@ import org.springframework.data.repository.query.Param;
 
 import com.entity.OrderEntity;
 
-public interface OrderEntityRepository extends JpaRepository<OrderEntity, Long>{
+public interface OrderEntityRepository extends JpaRepository<OrderEntity, Long> {
 
 	Optional<OrderEntity> findByOrderId(String orderId);
+
 	Optional<OrderEntity> findByOrderIdAndUserId(String orderId, String userId);
-	
+
 	List<OrderEntity> findAllByOrderByCreatedAtDesc();
+
 	List<OrderEntity> findByUserIdOrderByCreatedAtDesc(String userId);
-	
+
 	@Query("SELECT SUM(o.grandTotal) FROM OrderEntity o WHERE DATE(o.createdAt) = :date AND (:userId IS NULL OR o.userId = :userId)")
 	Double sumSalesByDate(@Param("date") LocalDate date, @Param("userId") String userId);
 
@@ -33,4 +35,13 @@ public interface OrderEntityRepository extends JpaRepository<OrderEntity, Long>{
 
 	@Query("SELECT SUM(o.grandTotal) FROM OrderEntity o")
 	Double sumAllSales();
+
+	@Query("SELECT o FROM OrderEntity o WHERE o.userId = :userId " +
+	       "AND (:startDate IS NULL OR DATE(o.createdAt) >= :startDate) " +
+	       "AND (:endDate IS NULL OR DATE(o.createdAt) <= :endDate) " +
+	       "ORDER BY o.createdAt ASC")
+	List<OrderEntity> findOrdersByDateRange(
+			@Param("userId") String userId,
+			@Param("startDate") LocalDate startDate,
+			@Param("endDate") LocalDate endDate);
 }

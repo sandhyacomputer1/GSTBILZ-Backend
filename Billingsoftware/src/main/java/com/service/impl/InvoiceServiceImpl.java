@@ -167,15 +167,16 @@ public class InvoiceServiceImpl implements InvoiceService {
         Font regularFont = new Font(Font.FontFamily.HELVETICA, 10, Font.NORMAL, BaseColor.BLACK);
         Font tableHeaderFont = new Font(Font.FontFamily.HELVETICA, 9, Font.BOLD, BaseColor.WHITE);
 
-        // 1. Header Section (Logo on Left, Company Details on Right)
+        // 1. Header Section (Logo on Left, Centered Company Details on Right)
         PdfPTable headerTable = new PdfPTable(2);
         headerTable.setWidthPercentage(100);
-        headerTable.setWidths(new float[] { 25, 75 });
+        headerTable.setWidths(new float[] { 20, 80 });
         headerTable.setSpacingAfter(15);
 
-        // Left Cell - Logo
+        // Logo Cell (Left aligned)
         PdfPCell logoCell = new PdfPCell();
         logoCell.setBorder(Rectangle.NO_BORDER);
+        logoCell.setHorizontalAlignment(Element.ALIGN_LEFT);
         logoCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
 
         String logoUrl = shopOwner != null ? shopOwner.getShopLogoUrl() : null;
@@ -184,10 +185,23 @@ public class InvoiceServiceImpl implements InvoiceService {
             try {
                 Image img = Image.getInstance(logoUrl);
                 img.scaleToFit(70, 70);
+                img.setAlignment(Image.ALIGN_LEFT);
                 logoCell.addElement(img);
                 logoLoaded = true;
             } catch (Exception ex) {
-                System.err.println("Could not load shop logo image, falling back to default logo shapes: " + ex.getMessage());
+                System.err.println("Could not load shop logo image, falling back to default logo image: " + ex.getMessage());
+            }
+        }
+
+        if (!logoLoaded) {
+            try {
+                Image img = Image.getInstance("assets/logo.webp");
+                img.scaleToFit(70, 70);
+                img.setAlignment(Image.ALIGN_LEFT);
+                logoCell.addElement(img);
+                logoLoaded = true;
+            } catch (Exception ex) {
+                System.err.println("Could not load default logo image, using text/shape fallback: " + ex.getMessage());
             }
         }
 
@@ -195,6 +209,7 @@ public class InvoiceServiceImpl implements InvoiceService {
             // Draw default logo shapes and text side-by-side using nested table
             PdfPTable nestedLogoTable = new PdfPTable(2);
             nestedLogoTable.setWidthPercentage(100);
+            nestedLogoTable.setHorizontalAlignment(Element.ALIGN_LEFT);
             nestedLogoTable.setWidths(new float[] { 40, 60 });
             
             PdfPCell drawingCell = new PdfPCell();
@@ -223,10 +238,11 @@ public class InvoiceServiceImpl implements InvoiceService {
         }
         headerTable.addCell(logoCell);
 
-        // Right Cell - Company Details
+        // Company Details Cell (Centered)
         PdfPCell detailsCell = new PdfPCell();
         detailsCell.setBorder(Rectangle.NO_BORDER);
-        detailsCell.setHorizontalAlignment(Element.ALIGN_LEFT);
+        detailsCell.setHorizontalAlignment(Element.ALIGN_CENTER);
+        detailsCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
 
         String shopName = shopOwner != null ? shopOwner.getShopName() : "COMPANY NAME HERE";
         String shopAddress = shopOwner != null ? shopOwner.getShopAddress() : "Your Business Address 0000, Main Street, Unit 000C FEL, 0000";
@@ -240,19 +256,25 @@ public class InvoiceServiceImpl implements InvoiceService {
         Font companyDetailBoldFont = new Font(Font.FontFamily.HELVETICA, 9, Font.BOLD, BaseColor.BLACK);
 
         Paragraph namePara = new Paragraph(shopName.toUpperCase(), nameFont);
+        namePara.setAlignment(Element.ALIGN_CENTER);
         namePara.setSpacingAfter(2);
         detailsCell.addElement(namePara);
 
-        detailsCell.addElement(new Paragraph(shopAddress, companyDetailFont));
+        Paragraph addrPara = new Paragraph(shopAddress, companyDetailFont);
+        addrPara.setAlignment(Element.ALIGN_CENTER);
+        detailsCell.addElement(addrPara);
         
         String contactInfo = "Mob: " + shopMobile + " | Email: " + shopEmail;
         if (shopWebsite != null && !shopWebsite.isBlank()) {
             contactInfo += " | Web: " + shopWebsite;
         }
-        detailsCell.addElement(new Paragraph(contactInfo, companyDetailFont));
+        Paragraph contactPara = new Paragraph(contactInfo, companyDetailFont);
+        contactPara.setAlignment(Element.ALIGN_CENTER);
+        detailsCell.addElement(contactPara);
 
         if (gstNumber != null && !gstNumber.isBlank()) {
             Paragraph gstPara = new Paragraph("GSTIN: " + gstNumber, companyDetailBoldFont);
+            gstPara.setAlignment(Element.ALIGN_CENTER);
             gstPara.setSpacingBefore(2);
             detailsCell.addElement(gstPara);
         }
@@ -320,10 +342,9 @@ public class InvoiceServiceImpl implements InvoiceService {
         metaRow2.addCell(customerNameCell);
         document.add(metaRow2);
 
-        // Row 3: Mobile & Email
-        PdfPTable metaRow3 = new PdfPTable(2);
+        // Row 3: Mobile
+        PdfPTable metaRow3 = new PdfPTable(1);
         metaRow3.setWidthPercentage(100);
-        metaRow3.setWidths(new float[] { 50, 50 });
         metaRow3.setSpacingAfter(20);
 
         PdfPCell mobCell = new PdfPCell();
@@ -333,17 +354,6 @@ public class InvoiceServiceImpl implements InvoiceService {
         mobPhrase.add(new Phrase(order.getPhoneNumber(), normalValFont));
         mobCell.addElement(mobPhrase);
         metaRow3.addCell(mobCell);
-
-        PdfPCell emailCell = new PdfPCell();
-        emailCell.setBorder(Rectangle.NO_BORDER);
-        emailCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
-        Phrase emailPhrase = new Phrase();
-        emailPhrase.add(new Phrase("Email : ", boldLabelFont));
-        emailPhrase.add(new Phrase("N/A", normalValFont));
-        Paragraph emailPara = new Paragraph(emailPhrase);
-        emailPara.setAlignment(Element.ALIGN_RIGHT);
-        emailCell.addElement(emailPara);
-        metaRow3.addCell(emailCell);
         document.add(metaRow3);
 
         // 4. Items Table
@@ -465,6 +475,17 @@ public class InvoiceServiceImpl implements InvoiceService {
         sigTable.addCell(sigRight);
 
         document.add(sigTable);
+
+        // 8. Bill Creation Date and Time (in dark text)
+        Font dateTimeFont = new Font(Font.FontFamily.HELVETICA, 8, Font.BOLD, new BaseColor(26, 26, 26));
+        String formattedDateTime = order.getCreatedAt() != null 
+            ? order.getCreatedAt().format(DateTimeFormatter.ofPattern("dd/MM/yyyy hh:mm a")) 
+            : LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy hh:mm a"));
+        Paragraph dateTimePara = new Paragraph("Bill Generated On: " + formattedDateTime, dateTimeFont);
+        dateTimePara.setAlignment(Element.ALIGN_CENTER);
+        dateTimePara.setSpacingBefore(10);
+        dateTimePara.setSpacingAfter(10);
+        document.add(dateTimePara);
 
         document.close();
         return bos.toByteArray();
@@ -597,31 +618,7 @@ class InvoicePageEvent extends PdfPageEventHelper {
         cb.closePath();
         cb.fill();
 
-        // 3. CENTER WATERMARK
-        float centerX = pageWidth / 2;
-        float centerY = pageHeight / 2;
-        float wSize = 250f;
-
-        PdfGState gs = new PdfGState();
-        gs.setFillOpacity(0.05f);
-        cb.setGState(gs);
-
-        // Watermark orange: top-left polygon
-        cb.setColorFill(new BaseColor(248, 158, 49));
-        cb.moveTo(centerX - wSize/2, centerY - wSize/2);
-        cb.lineTo(centerX + wSize/2, centerY + wSize/2);
-        cb.lineTo(centerX - wSize/2, centerY + wSize/2);
-        cb.closePath();
-        cb.fill();
-
-        // Watermark blue: bottom-right polygon
-        cb.setColorFill(new BaseColor(0, 59, 92));
-        cb.moveTo(centerX - wSize/2, centerY - wSize/2);
-        cb.lineTo(centerX + wSize/2, centerY - wSize/2);
-        cb.lineTo(centerX + wSize/2, centerY + wSize/2);
-        cb.closePath();
-        cb.fill();
-
+        // Watermark completely removed from bill layout per user request.
         cb.restoreState();
     }
 }

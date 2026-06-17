@@ -55,6 +55,7 @@ public class ItemServiceImpl implements ItemService {
                 .description(request.getDescription())
                 .price(request.getPrice())
                 .gstPercentage(request.getGstPercentage())
+                .stockQuantity(request.getStockQuantity())
                 .category(category)
                 .imgUrl(imgUrl)
                 .userId(currentUser.getTenantId())
@@ -68,6 +69,7 @@ public class ItemServiceImpl implements ItemService {
                 .description(item.getDescription())
                 .price(item.getPrice())
                 .gstPercentage(item.getGstPercentage())
+                .stockQuantity(item.getStockQuantity())
                 .categoryId(category.getCategoryId())
                 .categoryName(category.getName())
                 .imgUrl(item.getImgUrl())
@@ -87,6 +89,7 @@ public class ItemServiceImpl implements ItemService {
                         .description(item.getDescription())
                         .price(item.getPrice())
                         .gstPercentage(item.getGstPercentage())
+                        .stockQuantity(item.getStockQuantity())
                         .categoryId(item.getCategory().getCategoryId())
                         .categoryName(item.getCategory().getName())
                         .imgUrl(item.getImgUrl())
@@ -122,6 +125,7 @@ public class ItemServiceImpl implements ItemService {
         item.setDescription(request.getDescription());
         item.setPrice(request.getPrice());
         item.setGstPercentage(request.getGstPercentage());
+        item.setStockQuantity(request.getStockQuantity());
         item.setCategory(category);
 
         if (file != null && !file.isEmpty()) {
@@ -138,6 +142,7 @@ public class ItemServiceImpl implements ItemService {
                 .description(item.getDescription())
                 .price(item.getPrice())
                 .gstPercentage(item.getGstPercentage())
+                .stockQuantity(item.getStockQuantity())
                 .categoryId(category.getCategoryId())
                 .categoryName(category.getName())
                 .imgUrl(item.getImgUrl())

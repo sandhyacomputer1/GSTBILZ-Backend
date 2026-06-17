@@ -14,4 +14,5 @@ public class ItemRequest {
     private String categoryId;
     private String description;
     private BigDecimal gstPercentage;
+    private Integer stockQuantity;
 }

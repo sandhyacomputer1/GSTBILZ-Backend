@@ -25,7 +25,7 @@ public class ItemController {
     @ResponseStatus(HttpStatus.CREATED)
     public ItemResponse addItem(
             @RequestPart("items") String request,
-            @RequestPart("file") MultipartFile file) {
+            @RequestParam("file") MultipartFile file) {
 
         try {
             ItemRequest itemRequest =
@@ -57,7 +57,7 @@ public class ItemController {
     public ItemResponse editItem(
             @PathVariable String itemId,
             @RequestPart("items") String request,
-            @RequestPart(value = "file", required = false) MultipartFile file) {
+            @RequestParam(value = "file", required = false) MultipartFile file) {
         try {
             ItemRequest itemRequest =
                     new ObjectMapper().readValue(request, ItemRequest.class);

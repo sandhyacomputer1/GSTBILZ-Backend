@@ -22,7 +22,7 @@ public class AdminInitializer implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         initializeAdmin("rupnar8459@gmail.com", "Super Admin 1", "admin123");
-        initializeAdmin("vitthalrupnar8459@gmail.com", "Super Admin 2", "admin123");
+        initializeAdmin("sandhyacomputer1@gmail.com", "Super Admin 2", "admin123");
     }
 
     private void initializeAdmin(String email, String name, String rawPassword) {

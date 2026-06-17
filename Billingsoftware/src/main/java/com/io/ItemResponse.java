@@ -18,6 +18,7 @@ public class ItemResponse {
     private String categoryName;
     private String imgUrl;
     private BigDecimal gstPercentage;
+    private Integer stockQuantity;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

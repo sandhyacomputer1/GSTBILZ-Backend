@@ -11,7 +11,10 @@ import org.springframework.security.core.Authentication;
 
 import com.io.DashboardResponse;
 import com.io.OrderResponse;
+import com.io.SubscriptionStatsResponse;
+import com.service.NotificationService;
 import com.service.OrderService;
+import com.service.SubscriptionService;
 import com.repository.UserRepository;
 import com.repository.OrderEntityRepository;
 
@@ -25,6 +28,8 @@ public class DashboardController {
     private final OrderService orderService;
     private final UserRepository userRepository;
     private final OrderEntityRepository orderEntityRepository;
+    private final SubscriptionService subscriptionService;
+    private final NotificationService notificationService;
 
     @GetMapping
     public DashboardResponse getDashboardData() {
@@ -49,6 +54,21 @@ public class DashboardController {
             response.setTotalCustomers(orderEntityRepository.countUniqueCustomers());
             Double totalColl = orderEntityRepository.sumAllSales();
             response.setTotalCollection(totalColl != null ? totalColl : 0.0);
+
+            SubscriptionStatsResponse subStats = subscriptionService.getStats();
+            response.setTrialAccounts(subStats.getTrialAccounts());
+            response.setActiveSubscriptions(subStats.getActiveSubscriptions());
+            response.setExpiredSubscriptions(subStats.getExpiredSubscriptions());
+            response.setExpiringWithin7Days(subStats.getExpiringWithin7Days());
+            response.setMonthlySubscriptionRevenue(subStats.getMonthlyRevenue());
+            response.setYearlySubscriptionRevenue(subStats.getYearlyRevenue());
+
+            // Unread notifications count for the super admin
+            String adminEmail = authentication.getName();
+            com.entity.UserEntity adminUser = userRepository.findByEmail(adminEmail).orElse(null);
+            if (adminUser != null) {
+                response.setUnreadNotifications(notificationService.getUnreadCount(adminUser.getUserId()));
+            }
         }
 
         return response;

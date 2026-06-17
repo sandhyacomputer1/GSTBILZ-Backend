@@ -43,9 +43,12 @@ public class SecurityConfig {
 				.csrf(AbstractHttpConfigurer::disable)
 				.authorizeHttpRequests(auth -> auth
 						.requestMatchers("/", "/login", "/encode", "/error", "/verify-email", "/register-shop",
-								"/login/google", "/forgot-password", "/reset-password")
+								"/login/google", "/forgot-password", "/reset-password", "/public/**")
 						.permitAll()
 						.requestMatchers("/admin/shop-owners", "/admin/shop-owners/**").hasRole("SUPERADMIN")
+						.requestMatchers("/admin/subscriptions", "/admin/subscriptions/**").hasRole("SUPERADMIN")
+						.requestMatchers("/subscription-status").hasAnyRole("SHOPOWNER", "EMPLOYEE", "SUPERADMIN")
+						.requestMatchers("/notifications", "/notifications/**").authenticated()
 						.requestMatchers(HttpMethod.DELETE, "/orders/**").hasAnyRole("SHOPOWNER", "SUPERADMIN")
 						.requestMatchers("/categories", "/categories/**", "/items", "/items/**", "/admin/items",
 								"/admin/items/**", "/admin/categories", "/admin/categories/**", "/orders", "/payments",
@@ -76,7 +79,7 @@ public class SecurityConfig {
 	public CorsConfigurationSource corsConfigurationSource() {
 
 		CorsConfiguration config = new CorsConfiguration();
-		config.setAllowedOrigins(List.of("http://localhost:5173", "https://gstbliz.up.railway.app",
+		config.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:5173",
 				"https://gstbliz.up.railway.app/"));
 		config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
 		config.setAllowedHeaders(List.of("Authorization", "Content-Type"));

@@ -18,6 +18,7 @@ import com.entity.UserEntity;
 import com.io.UserResponse;
 import com.repository.UserRepository;
 import com.service.EmailService;
+import com.service.SubscriptionService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -28,6 +29,7 @@ public class SuperAdminController {
 
     private final UserRepository userRepository;
     private final EmailService emailService;
+    private final SubscriptionService subscriptionService;
 
     @GetMapping
     public List<UserResponse> getShopOwners() {
@@ -57,6 +59,15 @@ public class SuperAdminController {
 
         UserEntity saved = userRepository.save(user);
         emailService.sendAccountApprovedEmail(saved.getEmail(), saved.getName());
+
+        // Assign 7-day free trial on first approval
+        try {
+            subscriptionService.assignFreeTrial(saved.getUserId());
+            emailService.sendTrialStartEmail(saved.getEmail(), saved.getName(),
+                    java.time.LocalDate.now().plusDays(7).toString());
+        } catch (Exception e) {
+            // Non-critical — log and continue
+        }
 
         return convertToResponse(saved);
     }
